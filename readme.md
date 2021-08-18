@@ -2,7 +2,7 @@
 Simple package to switch between elixir-mode and web-mode when viewing .ex files. Checks the current cursor position on an interval to determine if inside a code block that starts with the ~F sigil. This is a global minor mode.
 
 ### Getting Started
-Either clone from this GitHub repository or install from MELPA (recommended).
+Clone from this GitHub repository (later we hope to have the package listed on MELPA).
 
 If you've cloned the repository, follow these instructions:
 1. Place surface-detect.el somewhere on your Emacs load path with `(add-to-list 'load-path "/path/to/surface-detect/")
