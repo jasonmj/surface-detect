@@ -89,36 +89,36 @@
 ;;; **************************************************************************
 
 (defun surface-detect()
-  (setq originalPos (line-number-at-pos))
-  (beginning-of-buffer)
-  (if (search-forward "~F\"\"\"" nil t)
-      (progn
-        (setq firstLine
-              (buffer-substring-no-properties
-               (line-beginning-position)
-               (line-end-position)))
-        (search-forward "~F\"\"\"" nil t)
-        (setq sigilPos (line-number-at-pos))
-        (search-forward "\"\"\"" nil t)
-        (setq endQuotesPos (line-number-at-pos))
-        (setq endQuotesLine (thing-at-point 'line))
-        (pop-to-mark-command)
-        (if (>= originalPos endQuotesPos)
+  (setq originalLine (line-number-at-pos))
+  (progn
+    (setq sigilPos
+          (string-to-number
+           (car
+            (split-string
+             (shell-command-to-string
+              (concat "awk '/F\"\"\"/ {print FNR}' " (buffer-name))) "\n"))))
+    (setq endQuotesLine
+          (car
+           (seq-filter (apply-partially #'< sigilPos)
+                       (mapcar 'string-to-number
+                               (split-string
+                                (shell-command-to-string
+                                 (concat "awk '/ \"\"\"/ {print FNR}' " (buffer-name))) "\n")))))
+    (if (>= originalLine endQuotesLine)
+        (unless (eq major-mode 'elixir-mode)
+          (progn
+            (elixir-mode)
+            (run-hooks 'surface-detect-switched)))
+      (if (>= originalLine sigilPos)
+          (unless (eq major-mode 'web-mode)
+            (progn
+              (web-mode)
+              (run-hooks 'surface-detect-switched)))
+        (if (< originalLine sigilPos)
             (unless (eq major-mode 'elixir-mode)
               (progn
                 (elixir-mode)
-                (run-hooks 'surface-detect-switched)))
-          (if (>= originalPos sigilPos)
-              (unless (eq major-mode 'web-mode)
-                (progn
-                  (web-mode)
-                  (run-hooks 'surface-detect-switched)))
-            (if (< originalPos sigilPos)
-                (unless (eq major-mode 'elixir-mode)
-                  (progn
-                    (elixir-mode)
-                    (run-hooks 'surface-detect-switched)))))))
-    (pop-to-mark-command)))
+                (run-hooks 'surface-detect-switched))))))))
 
 (defun surface-detect-disable ()
   "Cancels the timer and ensures surface-detect-mode is off."
